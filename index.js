@@ -5,6 +5,7 @@ require("dotenv").config();
 const app = express();
 
 app.use(cors());
+app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
@@ -19,13 +20,15 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const productsCollections = client.db("pizza").collection("products");
+        const ordersCollections = client.db("pizza").collection("orders");
 
+        // fetch all products
         app.get("/products", async (req, res) => {
             const result = await productsCollections.find().toArray();
             res.send(result);
         });
 
-        // details api
+        // fetch product by id
         app.get("/productDetails/:id", async (req, res) => {
             const id = req.params.id;
             // console.log(typeof id);
@@ -34,6 +37,7 @@ async function run() {
             res.send(result);
         });
 
+        // fetch products by ids
         app.get("/cartItems", async (req, res) => {
             let ids = req.query.ids;
             if (!ids) {
@@ -41,9 +45,16 @@ async function run() {
             }
             ids = ids?.split(",");
 
-            console.log(ids);
             const query = { _id: { $in: ids?.map((id) => ObjectId(id)) } };
             const result = await productsCollections.find(query).toArray();
+            res.send(result);
+        });
+
+        app.post("/orders", async (req, res) => {
+            console.log("hello");
+            const orders = req.body;
+            console.log(orders);
+            const result = await ordersCollections.insertOne(orders);
             res.send(result);
         });
     } finally {
