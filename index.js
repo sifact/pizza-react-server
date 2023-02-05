@@ -50,11 +50,21 @@ async function run() {
             res.send(result);
         });
 
+        // store orders
         app.post("/orders", async (req, res) => {
             console.log("hello");
             const orders = req.body;
             console.log(orders);
             const result = await ordersCollections.insertOne(orders);
+            res.send(result);
+        });
+
+        // get orders
+        app.get("/orders", async (req, res) => {
+            const result = await ordersCollections
+                .find()
+                .sort({ _id: -1 })
+                .toArray();
             res.send(result);
         });
     } finally {
