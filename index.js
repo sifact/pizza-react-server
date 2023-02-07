@@ -22,6 +22,13 @@ async function run() {
         const productsCollections = client.db("pizza").collection("products");
         const ordersCollections = client.db("pizza").collection("orders");
 
+        // receive products and store in db
+        app.post("/products", async (req, res) => {
+            const productData = req.body;
+            const result = await productsCollections.insertOne(productData);
+            res.send(result);
+        });
+
         // fetch all products
         app.get("/products", async (req, res) => {
             const result = await productsCollections.find().toArray();
@@ -50,6 +57,42 @@ async function run() {
             res.send(result);
         });
 
+        // delete product
+
+        app.delete("/delete/:id", async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollections.deleteOne(query);
+            res.send(result);
+        });
+
+        // update product
+
+        app.put("/update/:id", async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const updatedProduct = req.body;
+            console.log(updatedProduct);
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    name: updatedProduct.productName,
+                    price: updatedProduct.price,
+                    quantity: updatedProduct.quantity,
+                    desc: updatedProduct.desc,
+                },
+            };
+
+            const result = await productsCollections.updateOne(
+                filter,
+                updateDoc,
+                options
+            );
+
+            res.send(result);
+        });
         // store orders
         app.post("/orders", async (req, res) => {
             console.log("hello");
