@@ -31,7 +31,10 @@ async function run() {
 
         // fetch all products
         app.get("/products", async (req, res) => {
-            const result = await productsCollections.find().toArray();
+            const result = await productsCollections
+                .find()
+                .sort({ _id: -1 })
+                .toArray();
             res.send(result);
         });
 
